@@ -643,7 +643,11 @@ class ExecutionContext(IncrementalPublisherMixin):
                 results.update(
                     zip(
                         awaitable_fields,
-                        await gather(*(results[field] for field in awaitable_fields)),
+                        # PATCHED by @instil-chloe on 2024-08-01 to resolve
+                        # issue where @sync_to_async sometimes hangs forever
+                        # when called from gather()
+                        # await gather(*(results[field] for field in awaitable_fields)),
+                        [await results[field] for field in awaitable_fields],
                     )
                 )
             return results
